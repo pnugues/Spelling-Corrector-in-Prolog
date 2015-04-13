@@ -37,4 +37,4 @@ C = corrected.
 ~~~
   where correct/2 is the correction predicate, the first argument, the word to correct, and the second one, the corrected word.
 
-The Prolog program tries to follow the structure of the original in Python. It is longer however, 53 lines vs. 21, as Prolog lacks many built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes one line in Python while it takes 8 lines in Prolog.
+The Prolog program tries to follow the structure of the original in Python. It is longer however, 53 lines vs. 21, as Prolog lacks many built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes only one line in Python while it takes 8 lines in Prolog.
