@@ -10,11 +10,11 @@ To run the program, be sure to have a copy of SWI-Prolog and place the big.txt c
   ~~~
   > swipl -G1000000 -L1000000
   ~~~
-  The Prolog interpreter is an interactive shell where you type the predicates after the prompt:
+  The Prolog interpreter is an interactive shell, where you type the predicates after the prompt symbols:
   ~~~
   ?-
   ~~~
-  2. You load the spell.pl program in Prolog, by typing:
+  2. You load the spell.pl program in Prolog by typing:
   
   ~~~
   ?- [spell].
