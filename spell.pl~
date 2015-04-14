@@ -42,8 +42,7 @@ edits1(WAtom, SEdtAtoms) :-
 	findall(Replace, (append(Start, [_|End], W), letter(L), append(Start, [L|End], Replace)), Replaces),
 	findall(Insert, (append(Start, End, W), letter(L), append(Start, [L|End], Insert)), Inserts),
 	append([Deletes, Transposes, Replaces, Inserts], E),
-	maplist(atom_chars, EdtAtoms, E),
-	sort(EdtAtoms, SEdtAtoms), !.
+	maplist(atom_chars, EdtAtoms, E), sort(EdtAtoms, SEdtAtoms), !.
 
 known(Words, Dict, Known) :- findall(W, (member(W, Words), _ = Dict.get(W)), Known).
 
