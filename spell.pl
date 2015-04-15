@@ -33,7 +33,6 @@ word([]) --> [].
 letter(Char) --> [Char], {char_type(Char, lower), !}.
 
 blanks --> [Char], {\+ char_type(Char, lower), !}.
-blanks --> [].
 
 edits1(WAtom, SEdtAtoms) :-
 	atom_chars(WAtom, W),
