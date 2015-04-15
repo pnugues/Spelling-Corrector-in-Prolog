@@ -14,7 +14,7 @@ To run the program, be sure to have a copy of SWI-Prolog and place the big.txt c
   ~~~
   ?-
   ~~~
-  2. You load the spell.pl program in Prolog by typing:
+  2. You load the `spell.pl` program in Prolog by typing:
   
   ~~~
   ?- [spell].
@@ -26,7 +26,7 @@ To run the program, be sure to have a copy of SWI-Prolog and place the big.txt c
   ?- init.
   true.
   ~~~
-  This predicate creates a word dictionary out of the big.txt corpus: It extracts each word and, for each word, counts how many times it occurs in the corpus.
+  This predicate creates a word dictionary out of the `big.txt` corpus: It extracts each word and, for each word, counts how many times it occurs in the corpus.
   4. And finally, you find the correction of a word by typing:
  
  ~~~
@@ -35,6 +35,6 @@ C = spelling.
 ?- correct(korrecter, C).
 C = corrected.
 ~~~
-  where correct/2 is the correction predicate, the first argument, the word to correct, and the second one, the proposed correction.
+  where `correct/2` is the correction predicate, the first argument, the word to correct, and the second one, the proposed correction.
 
 The Prolog program tries to follow the structure of the original in Python. It is longer however, 49 lines vs. 21, as Prolog lacks many built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes only one line in Python while it takes 8 lines in Prolog.
