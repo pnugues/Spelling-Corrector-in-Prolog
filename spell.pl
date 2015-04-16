@@ -83,8 +83,9 @@ count_errors(Target:WrongAtom, ErrCnt) :-
 	maplist(correct, Wrongs, Corrects),
 	cnt(Target, Corrects, 0, ErrCnt).
 
-cnt(_, [], N, N).
+cnt(_, [], N, N) :- !.
 cnt(Target, [Target | Corrects], N, NErr) :-
+	!,
 	cnt(Target, Corrects, N, NErr).
 cnt(Target, [_ | Corrects], N, NErr) :-
 	N1 is N + 1,
