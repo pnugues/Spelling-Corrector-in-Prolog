@@ -37,4 +37,6 @@ C = corrected.
 ~~~
   where `correct/2` is the correction predicate, the first argument, the word to correct, and the second one, the proposed correction.
 
-The Prolog program tries to follow the structure of the original in Python, and feels very natural and intuitive, notably the core of it: the `edits1` predicate. This program is longer however, 48 lines vs. 21, as Prolog lacks many built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes only one line in Python while it takes 7 lines in Prolog.
+The Prolog program tries to follow the structure of the original in Python, and feels very natural and intuitive, notably the core of it: the `edits1` predicate. This program is longer however, 43 lines vs. 21, as Prolog lacks certain built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes only one line in Python while it takes 8 lines in Prolog.
+
+PS. Jan Wielemaker suggested me the `phrase_from_file` input predicate of the latest version of the program.
