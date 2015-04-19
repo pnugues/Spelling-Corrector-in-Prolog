@@ -9,30 +9,24 @@
 init :- nwords(Dict), asserta(dict(Dict) :- !).
 
 nwords(Dict) :-
-	read_text(Words),
+	phrase_from_file(words(CodeLists), 'big.txt'),
+	maplist(atom_codes, Words, CodeLists),
 	count_occurrences(Words, CWords),
 	dict_create(Dict, dict, CWords).
 
-read_text(Words) :-
-	open('big.txt', read, Stream),
-	read_stream_to_codes(Stream, Codes),
-	string_chars(Codes, Chars),
-	maplist(downcase_atom, Chars, LCChars),
-	words(CharLists, LCChars, []),
-	maplist(atom_chars, Words, CharLists).
-
-letter(Char) :- member(Char, [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
-
+words(WCodes) --> blank, !, words(WCodes).
+words([WCodes | WsCodes]) --> word(WCodes), !, words(WsCodes).
 words([]) --> [].
-words([[Char | WChars] | RChars]) --> word([Char | WChars]), blanks, words(RChars).
-words(RChars) --> blanks, words(RChars).
 
-word([Char | Chars]) --> letter(Char), word(Chars).
-word([]) --> [].
+word([Code | Codes]) --> letters([Code | Codes]).
 
-letter(Char) --> [Char], {char_type(Char, lower), !}.
+letters([L | Ls]) --> letter(L), !, letters(Ls).
+letters([]) --> [].
 
-blanks --> [Char], {\+ char_type(Char, lower), !}.
+letter(Lower) --> [Code], {code_type(Code, alpha), code_type(Code, to_upper(Lower))}.
+
+blank --> [Code], {\+ code_type(Code, alpha)}, !.
+
 
 edits1(WAtom, SEdtAtoms) :-
 	atom_chars(WAtom, W),
@@ -43,6 +37,8 @@ edits1(WAtom, SEdtAtoms) :-
 	append([Deletes, Transposes, Replaces, Inserts], E),
 	maplist(atom_chars, EdtAtoms, E),
 	sort(EdtAtoms, SEdtAtoms), !.
+
+letter(Char) :- member(Char, [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
 
 known(Words, Dict, Known) :- findall(W, (member(W, Words), _ = Dict.get(W)), Known).
 
@@ -93,5 +89,6 @@ cnt(Target, [_ | Corrects], N, NErr) :-
 
 list_sum([], 0).
 list_sum([N|L], Sum) :-
+	!,
 	list_sum(L, Sum1),
 	Sum is N + Sum1.
