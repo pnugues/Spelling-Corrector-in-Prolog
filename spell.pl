@@ -27,7 +27,6 @@ letter(Lower) --> [Code], {code_type(Code, alpha), code_type(Code, to_upper(Lowe
 
 blank --> [Code], {\+ code_type(Code, alpha)}, !.
 
-
 edits1(WAtom, SEdtAtoms) :-
 	atom_chars(WAtom, W),
 	findall(Delete, (append(Start, [_|End], W), append(Start, End, Delete)), Deletes),
@@ -47,19 +46,19 @@ known_edits2(Word, Dict, KnownUniqEds2) :-
 	findall(Ed2, (member(Ed1, Ed1s), edits1(Ed1, Eds2), member(Ed2, Eds2), _ = Dict.get(Ed2)), KEds2), !,
 	sort(KEds2, KnownUniqEds2).
 
-correct(Word, Correct) :- dict(Dict), !, correct(Word, Dict, Correct).
+correct(Word, Correct) :- 
+	dict(Dict),
+	correct(Word, Dict, [Known | Knowns]),
+	maplist(val_key, [Known | Knowns], ValKeys),
+	max_member(_:Correct, ValKeys), !.
+correct(Word, Word).
 
-correct(Word, Dict, Word) :- _ = Dict.get(Word), !.
-correct(Word, Dict, Correct) :-
-	edits1(Word, Eds),
-	known(Eds, Dict, Known),
-	maplist(val_key, Known, ValKeys),
-	max_member(_:Correct, ValKeys), !.
-correct(Word, Dict, Correct) :-
-	known_edits2(Word, Dict, Known),
-	maplist(val_key, Known, ValKeys),
-	max_member(_:Correct, ValKeys), !.
-correct(Word, _, Word).
+correct(Word, Dict, [Known | Knowns]) :-
+	(known([Word], Dict, [Known | Knowns])
+	;
+	edits1(Word, Eds), known(Eds, Dict, [Known | Knowns])
+	;
+	known_edits2(Word, Dict, [Known | Knowns])).
 
 val_key(Key, Val:Key) :- dict(D), Val = D.get(Key).
 
