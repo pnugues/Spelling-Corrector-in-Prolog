@@ -48,8 +48,8 @@ known_edits2(Word, Dict, KnownUniqEds2) :-
 
 correct(Word, Correct) :- 
 	dict(Dict),
-	correct(Word, Dict, [Known | Knowns]),
-	maplist(val_key, [Known | Knowns], ValKeys),
+	correct(Word, Dict, Knowns),
+	maplist(val_key, Knowns, ValKeys),
 	max_member(_:Correct, ValKeys), !.
 correct(Word, Word).
 
