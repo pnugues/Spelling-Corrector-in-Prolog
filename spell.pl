@@ -26,7 +26,7 @@ letters([]) --> [].
 
 letter(Code) --> [Code], {code_type(Code, alpha)}.
 
-blank --> [Code], {\+ code_type(Code, alpha)}, !.
+blank --> [Code], {\+ code_type(Code, alpha)}.
 
 edits1(WAtom, SEdtAtoms) :-
 	atom_chars(WAtom, W),
