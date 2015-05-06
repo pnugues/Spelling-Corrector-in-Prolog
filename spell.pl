@@ -11,8 +11,9 @@ init :- nwords(Dict), asserta(dict(Dict) :- !).
 nwords(Dict) :-
 	phrase_from_file(words(CodeLists), 'big.txt'),
 	maplist(atom_codes, Words, CodeLists),
-	count_occurrences(Words, CWords),
-	dict_create(Dict, dict, CWords).
+	maplist(downcase_atom, Words, LCWords),
+	count_occurrences(LCWords, CntdWords),
+	dict_create(Dict, dict, CntdWords).
 
 words(WCodes) --> blank, !, words(WCodes).
 words([WCodes | WsCodes]) --> word(WCodes), !, words(WsCodes).
@@ -23,7 +24,7 @@ word([Code | Codes]) --> letters([Code | Codes]).
 letters([L | Ls]) --> letter(L), !, letters(Ls).
 letters([]) --> [].
 
-letter(Lower) --> [Code], {code_type(Code, alpha), code_type(Code, to_upper(Lower))}.
+letter(Code) --> [Code], {code_type(Code, alpha)}.
 
 blank --> [Code], {\+ code_type(Code, alpha)}, !.
 
