@@ -6,7 +6,7 @@
 
 %:- initialization init.
 
-init :- nwords(Dict), asserta(dict(Dict) :- !).
+init :- nwords(Dict), asserta((dict(Dict) :- !)).
 
 nwords(Dict) :-
 	phrase_from_file(words(CodeLists), 'big.txt'),
