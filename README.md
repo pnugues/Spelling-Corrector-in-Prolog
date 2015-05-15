@@ -5,10 +5,10 @@ Peter Norvig wrote a delightful spelling corrector in 21 lines of Python. It ins
 All the design details of the corrector are available from Peter Norvig's <a href="http://norvig.com/spell-correct.html">page</a> as well as the corpus needed to build the dictionary: big.txt.
 
 To run the program, be sure to have a copy of SWI-Prolog and place the big.txt corpus in the same folder as the spell.pl program. As the program uses dictionaries, a not-so-common feature of Prologs, you need SWI-Prolog version 7.1 or better.
-  1. You start first SWI-Prolog from a command shell with enough global and local stack memory:
+  1. You start first SWI-Prolog from a command shell:
   
   ~~~
-  > swipl -G1000000 -L1000000
+  > swipl
   ~~~
   The Prolog interpreter is an interactive shell, where you type the predicates after the prompt symbols:
   ~~~
