@@ -4,7 +4,7 @@ A Spelling Corrector in Prolog
 Peter Norvig wrote a delightful spelling corrector in 21 lines of Python. It inspired scores of people that reimplemented it in other programming languages. This program is a version of a similar corrector in <a href="http://www.swi-prolog.org/">SWI-Prolog</a>.
 All the design details of the corrector are available from Peter Norvig's <a href="http://norvig.com/spell-correct.html">page</a> as well as the corpus needed to build the dictionary: big.txt.
 
-To run the program, be sure to have a copy of SWI-Prolog and place the big.txt corpus in the same folder as the spell.pl program. As the program uses dictionaries, a not-so-common feature of Prologs, you need SWI-Prolog version 7.1 or better.
+To run the program, be sure to have a copy of SWI-Prolog and place the big.txt corpus in the same folder as the spell.pl program.
   1. You start first SWI-Prolog from a command shell:
   
   ~~~
@@ -37,6 +37,6 @@ C = corrected.
 ~~~
   where `correct/2` is the correction predicate, the first argument, the word to correct, and the second one, the proposed correction.
 
-The Prolog program tries to follow the structure of the original in Python, and feels very natural and intuitive, notably the core of it: the `edits1` predicate. This program is longer however, 43 lines vs. 21, as Prolog lacks certain built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes only one line in Python while it takes 8 lines in Prolog.
+The Prolog program tries to follow the structure of the original in Python, and feels very natural and intuitive, notably the core of it: the `edits1` predicate. This program is longer however, 44 lines vs. 21, as Prolog lacks certain built-in functions available in Python as well as regular expressions. Using regexes, the tokenizing part, for example, takes only one line in Python while it takes 8 lines in Prolog.
 
-PS. Jan Wielemaker suggested me the `phrase_from_file` input predicate of the latest version of the program.
+PS. Jan Wielemaker suggested me the `phrase_from_file` input predicate of the latest version of the program. Gerlof Bouma advised me to remove the dictionaries to ensure a better portability and flip the order of the `append` and `letter` predicates in  `edits1`. This reduces considerably the number of inferences.
