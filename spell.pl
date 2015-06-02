@@ -6,14 +6,18 @@
 
 %:- initialization init.
 
-init :- nwords(Dict), asserta((dict(Dict) :- !)).
+:- dynamic(freq/2).
 
-nwords(Dict) :-
+init :-
+    retractall(freq(_, _)),
+    nwords(WordCounts),
+    maplist(assertz, WordCounts).
+    
+nwords(WordCounts) :-
 	phrase_from_file(words(CodeLists), 'big.txt'),
 	maplist(atom_codes, Words, CodeLists),
 	maplist(downcase_atom, Words, LCWords),
-	count_occurrences(LCWords, CntdWords),
-	dict_create(Dict, dict, CntdWords).
+	count_occurrences(LCWords, WordCounts).
 
 words(WCodes) --> blank, !, words(WCodes).
 words([WCodes | WsCodes]) --> word(WCodes), !, words(WsCodes).
@@ -32,38 +36,35 @@ edits1(WAtom, SEdtAtoms) :-
 	atom_chars(WAtom, W),
 	findall(Delete, (append(Start, [_|End], W), append(Start, End, Delete)), Deletes),
 	findall(Transpose, (append(Start, [X, Y|End], W), append(Start, [Y, X|End], Transpose)), Transposes),
-	findall(Replace, (append(Start, [_|End], W), letter(L), append(Start, [L|End], Replace)), Replaces),
-	findall(Insert, (append(Start, End, W), letter(L), append(Start, [L|End], Insert)), Inserts),
+	findall(Replace, (append(Start, [_|End], W), append(Start, [L|End], Replace), letter(L)), Replaces),
+	findall(Insert, (append(Start, End, W), append(Start, [L|End], Insert), letter(L)), Inserts),
 	append([Deletes, Transposes, Replaces, Inserts], E),
 	maplist(atom_chars, EdtAtoms, E),
 	sort(EdtAtoms, SEdtAtoms), !.
 
 letter(Char) :- member(Char, [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
 
-known(Words, Dict, Known) :- findall(W, (member(W, Words), _ = Dict.get(W)), Known).
+known(Words, Known) :- findall(W, (member(W, Words), freq(W, _)), Known).
 
-known_edits2(Word, Dict, KnownUniqEds2) :-
+known_edits2(Word, KnownUniqEds2) :-
 	edits1(Word, Ed1s),
-	findall(Ed2, (member(Ed1, Ed1s), edits1(Ed1, Eds2), member(Ed2, Eds2), _ = Dict.get(Ed2)), KEds2), !,
+	findall(Ed2, (member(Ed1, Ed1s), edits1(Ed1, Eds2), member(Ed2, Eds2), freq(Ed2, _)), KEds2), !,
 	sort(KEds2, KnownUniqEds2).
 
 correct(Word, Correct) :- 
-	dict(Dict),
-	correct(Word, Dict, Knowns),
+	correct_(Word, Knowns),
 	maplist(val_key, Knowns, ValKeys),
 	max_member(_:Correct, ValKeys), !.
 correct(Word, Word).
 
-correct(Word, Dict, [Known | Knowns]) :-
-	(known([Word], Dict, [Known | Knowns])
-	;
-	edits1(Word, Eds), known(Eds, Dict, [Known | Knowns])
-	;
-	known_edits2(Word, Dict, [Known | Knowns])).
+correct_(Word, [Known | Knowns]) :-
+	(known([Word], [Known | Knowns])
+	; edits1(Word, Eds), known(Eds, [Known | Knowns])
+	; known_edits2(Word, [Known | Knowns])).
 
-val_key(Key, Val:Key) :- dict(D), Val = D.get(Key).
+val_key(Key, Val:Key) :- freq(Key,Val).
 
-count_occurrences(Text, Occs):- findall(W:Cnt, (bagof(true, member(W, Text), Ws), length(Ws,Cnt)), Occs).
+count_occurrences(Text, Occs):- findall(freq(W, Cnt), (bagof(true, member(W, Text), Ws), length(Ws,Cnt)), Occs).
 
 test1(['access': 'acess', 'accessing': 'accesing', 'accommodation':'accomodation acommodation acomodation', 'account': 'acount', 'address':'adress adres', 'addressable': 'addresable', 'arranged': 'aranged arrainged','arrangeing': 'aranging', 'arrangement': 'arragment', 'articles': 'articals','aunt': 'annt anut arnt', 'auxiliary': 'auxillary', 'available': 'avaible','awful': 'awfall afful', 'basically': 'basicaly', 'beginning': 'begining','benefit': 'benifit', 'benefits': 'benifits', 'between': 'beetween', 'bicycle':'bicycal bycicle bycycle', 'biscuits':'biscits biscutes biscuts bisquits buiscits buiscuts', 'built': 'biult','cake': 'cak', 'career': 'carrer','cemetery': 'cemetary semetary', 'centrally': 'centraly', 'certain': 'cirtain','challenges': 'chalenges chalenges', 'chapter': 'chaper chaphter chaptur','choice': 'choise', 'choosing': 'chosing', 'clerical': 'clearical','committee': 'comittee', 'compare': 'compair', 'completely': 'completly','consider': 'concider', 'considerable': 'conciderable', 'contented':'contenpted contende contended contentid', 'curtains':'cartains certans courtens cuaritains curtans curtians curtions', 'decide': 'descide', 'decided':'descided', 'definitely': 'definately difinately', 'definition': 'defenition','definitions': 'defenitions', 'description': 'discription', 'desiccate':'desicate dessicate dessiccate', 'diagrammatically': 'diagrammaticaally','different': 'diffrent', 'driven': 'dirven', 'ecstasy': 'exstacy ecstacy','embarrass': 'embaras embarass', 'establishing': 'astablishing establising','experience': 'experance experiance', 'experiences': 'experances', 'extended':'extented', 'extremely': 'extreamly', 'fails': 'failes', 'families': 'familes','february': 'febuary', 'further': 'futher', 'gallery': 'galery gallary gallerry gallrey','hierarchal': 'hierachial', 'hierarchy': 'hierchy', 'inconvenient':'inconvienient inconvient inconvinient', 'independent': 'independant independant','initial': 'intial', 'initials': 'inetials inistals initails initals intials','juice': 'guic juce jucie juise juse', 'latest': 'lates latets latiest latist','laugh': 'lagh lauf laught lugh', 'level': 'leval','levels': 'levals', 'liaison': 'liaision liason', 'lieu': 'liew', 'literature':'litriture', 'loans': 'lones', 'locally': 'localy', 'magnificent':'magnificnet magificent magnifcent magnifecent magnifiscant magnifisent magnificant','management': 'managment', 'meant': 'ment', 'minuscule': 'miniscule','minutes': 'muinets', 'monitoring': 'monitering', 'necessary':'neccesary necesary neccesary necassary necassery neccasary', 'occurrence':'occurence occurence', 'often': 'ofen offen offten ofton', 'opposite':'opisite oppasite oppesite oppisit oppisite opposit oppossite oppossitte', 'parallel':'paralel paralell parrallel parralell parrallell', 'particular': 'particulaur','perhaps': 'perhapse', 'personnel': 'personnell', 'planned': 'planed', 'poem':'poame', 'poems': 'poims pomes', 'poetry': 'poartry poertry poetre poety powetry','position': 'possition', 'possible': 'possable', 'pretend':'pertend protend prtend pritend', 'problem': 'problam proble promblem proplen','pronunciation': 'pronounciation', 'purple': 'perple perpul poarple','questionnaire': 'questionaire', 'really': 'realy relley relly', 'receipt':'receit receite reciet recipt', 'receive': 'recieve', 'refreshment':'reafreshment refreshmant refresment refressmunt', 'remember': 'rember remeber rememmer rermember','remind': 'remine remined', 'scarcely': 'scarcly scarecly scarely scarsely','scissors': 'scisors sissors', 'separate': 'seperate','singular': 'singulaur', 'someone': 'somone', 'sources': 'sorces', 'southern':'southen', 'special': 'speaical specail specal speical', 'splendid':'spledid splended splened splended', 'standardizing': 'stanerdizing', 'stomach':'stomac stomache stomec stumache', 'supersede': 'supercede superceed', 'there': 'ther','totally': 'totaly', 'transferred': 'transfred', 'transportability':'transportibility', 'triangular': 'triangulaur', 'understand': 'undersand undistand','unexpected': 'unexpcted unexpeted unexspected', 'unfortunately':'unfortunatly', 'unique': 'uneque', 'useful': 'usefull', 'valuable': 'valubale valuble','variable': 'varable', 'variant': 'vairiant', 'various': 'vairious','visited': 'fisited viseted vistid vistied', 'visitors': 'vistors','voluntary': 'volantry', 'voting': 'voteing', 'wanted': 'wantid wonted','whether': 'wether', 'wrote': 'rote wote']).
 
