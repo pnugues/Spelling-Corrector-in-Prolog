@@ -4,17 +4,16 @@
 % Open source code under MIT license:
 % http://www.opensource.org/licenses/mit-license.php
 
-%:- initialization init.
-
 :- dynamic(freq/2).
 
 init :-
     retractall(freq(_, _)),
     nwords(WordCounts),
     maplist(assertz, WordCounts).
-    
+
 nwords(WordCounts) :-
-	phrase_from_file(words(CodeLists), 'big.txt'),
+    read_file_to_codes('big.txt', Codes, []),
+    words(CodeLists, Codes, []),
 	maplist(atom_codes, Words, CodeLists),
 	maplist(downcase_atom, Words, LCWords),
 	count_occurrences(LCWords, WordCounts).
@@ -31,16 +30,19 @@ letters([]) --> [].
 letter(Code) --> [Code], {code_type(Code, alpha)}.
 
 blank --> [Code], {\+ code_type(Code, alpha)}.
+    
+edits1(WAtom, SortedEditAtoms) :-
+    findall(EditAtom, (atom_chars(WAtom, W),
+		       append(Start, End, W),
+		       append(Start, End1, Edit),
+		       edit(End, End1),
+		       atom_chars(EditAtom, Edit)), EditAtoms),
+    sort(EditAtoms,SortedEditAtoms).
 
-edits1(WAtom, SEdtAtoms) :-
-	atom_chars(WAtom, W),
-	findall(Delete, (append(Start, [_|End], W), append(Start, End, Delete)), Deletes),
-	findall(Transpose, (append(Start, [X, Y|End], W), append(Start, [Y, X|End], Transpose)), Transposes),
-	findall(Replace, (append(Start, [_|End], W), append(Start, [L|End], Replace), letter(L)), Replaces),
-	findall(Insert, (append(Start, End, W), append(Start, [L|End], Insert), letter(L)), Inserts),
-	append([Deletes, Transposes, Replaces, Inserts], E),
-	maplist(atom_chars, EdtAtoms, E),
-	sort(EdtAtoms, SEdtAtoms), !.
+edit([_ | End], End). % delete
+edit([X, Y | End],[Y, X | End]). % transpose
+edit([_ | End], [L | End]):- letter(L). % replace
+edit(End, [L | End]):- letter(L). % insert
 
 letter(Char) :- member(Char, [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
 
@@ -48,7 +50,7 @@ known(Words, Known) :- findall(W, (member(W, Words), freq(W, _)), Known).
 
 known_edits2(Word, KnownUniqEds2) :-
 	edits1(Word, Ed1s),
-	findall(Ed2, (member(Ed1, Ed1s), edits1(Ed1, Eds2), member(Ed2, Eds2), freq(Ed2, _)), KEds2), !,
+	findall(Ed2, (member(Ed1, Ed1s), edits1(Ed1, Eds2), member(Ed2, Eds2), freq(Ed2, _)), KEds2),
 	sort(KEds2, KnownUniqEds2).
 
 correct(Word, Correct) :- 
@@ -72,7 +74,7 @@ test2(['forbidden': 'forbiden', 'decisions': 'deciscions descisions','supposedly
 
 spelltest(Test, ErrCnt) :-
 	maplist(count_errors, Test, ErrCnts),
-	list_sum(ErrCnts, ErrCnt).
+	sumlist(ErrCnts, ErrCnt).
 
 count_errors(Target:WrongAtom, ErrCnt) :-
 	split_string(WrongAtom, ' ', ' ', Wrong),
@@ -87,9 +89,3 @@ cnt(Target, [Target | Corrects], N, NErr) :-
 cnt(Target, [_ | Corrects], N, NErr) :-
 	N1 is N + 1,
 	cnt(Target, Corrects, N1, NErr).
-
-list_sum([], 0).
-list_sum([N|L], Sum) :-
-	!,
-	list_sum(L, Sum1),
-	Sum is N + Sum1.
