@@ -14,9 +14,9 @@ init :-
 nwords(CntdWords):-
     read_file_to_codes('big.txt', Codes, []),
     words(CodeLists, Codes, []),
-	maplist(atom_codes, Words, CodeLists),
-	maplist(downcase_atom, Words, LCWords),
-	count_occurrences(LCWords, CntdWords).
+    maplist(atom_codes, Words, CodeLists),
+    maplist(downcase_atom, Words, LCWords),
+    count_occurrences(LCWords, CntdWords).
 
 words(WCodes) --> blank, !, words(WCodes).
 words([WCodes | WsCodes]) --> word(WCodes), !, words(WsCodes).
@@ -31,6 +31,12 @@ letter(Code) --> [Code], {code_type(Code, alpha)}.
 
 blank --> [Code], {\+ code_type(Code, alpha)}.
 
+correct(Word, Correct) :-
+    ( freq(Word,_), !, Correct = Word
+    ; best_edit1(Word, Ed1), !, Correct = Ed1
+    ; best_edit2(Word, Ed2), !, Correct = Ed2
+    ; Correct = Word).
+
 edit(W, Edit):-
     append(Start, End, W),
     append(Start, End1, Edit),
@@ -40,32 +46,26 @@ edit_op([_|End], End). % delete
 edit_op([X,Y|End], [Y,X|End]). % transpose
 edit_op([_|End], [L|End]) :- letter(L). % replace
 edit_op(End, [L|End]) :- letter(L). % insert
-    
+
 letter(Char) :- member(Char, [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
 
 best_edit1(Word, BestEd1) :-
     findall(Freq-Ed1, (atom_chars(Word, WordChars),
-		       edit(WordChars, Ed1Chars),
-		       atom_chars(Ed1, Ed1Chars),
-		       freq(Ed1,Freq)), FreqKEd1s),
+            edit(WordChars, Ed1Chars),
+            atom_chars(Ed1, Ed1Chars),
+            freq(Ed1,Freq)), FreqKEd1s),
     max_member(_-BestEd1,FreqKEd1s).
 
 best_edit2(Word, BestEd2) :-
     findall(Freq-Ed2, (atom_chars(Word, WordChars),
-		       edit(WordChars, Ed1Chars),
-		       edit(Ed1Chars, Ed2Chars),
-		       atom_chars(Ed2, Ed2Chars),
-		       freq(Ed2,Freq)), FreqKEd2s),
+            edit(WordChars, Ed1Chars),
+            edit(Ed1Chars, Ed2Chars),
+            atom_chars(Ed2, Ed2Chars),
+            freq(Ed2,Freq)), FreqKEd2s),
     max_member(_-BestEd2,FreqKEd2s).
 
-correct(Word, Correct) :-
-    ( freq(Word,_), !, Correct = Word
-    ; best_edit1(Word, Ed1), !, Correct = Ed1
-    ; best_edit2(Word, Ed2), !, Correct = Ed2
-    ; Correct = Word).
-
 count_occurrences(Text, Occs):-
-    findall(freq(W,Cnt), (bagof(true,member(W, Text), Ws), length(Ws,Cnt)), Occs).
+    findall(freq(W, Cnt), (bagof(true, member(W, Text), Ws), length(Ws,Cnt)), Occs).
 
 test1(['access': 'acess', 'accessing': 'accesing', 'accommodation':'accomodation acommodation acomodation', 'account': 'acount', 'address':'adress adres', 'addressable': 'addresable', 'arranged': 'aranged arrainged','arrangeing': 'aranging', 'arrangement': 'arragment', 'articles': 'articals','aunt': 'annt anut arnt', 'auxiliary': 'auxillary', 'available': 'avaible','awful': 'awfall afful', 'basically': 'basicaly', 'beginning': 'begining','benefit': 'benifit', 'benefits': 'benifits', 'between': 'beetween', 'bicycle':'bicycal bycicle bycycle', 'biscuits':'biscits biscutes biscuts bisquits buiscits buiscuts', 'built': 'biult','cake': 'cak', 'career': 'carrer','cemetery': 'cemetary semetary', 'centrally': 'centraly', 'certain': 'cirtain','challenges': 'chalenges chalenges', 'chapter': 'chaper chaphter chaptur','choice': 'choise', 'choosing': 'chosing', 'clerical': 'clearical','committee': 'comittee', 'compare': 'compair', 'completely': 'completly','consider': 'concider', 'considerable': 'conciderable', 'contented':'contenpted contende contended contentid', 'curtains':'cartains certans courtens cuaritains curtans curtians curtions', 'decide': 'descide', 'decided':'descided', 'definitely': 'definately difinately', 'definition': 'defenition','definitions': 'defenitions', 'description': 'discription', 'desiccate':'desicate dessicate dessiccate', 'diagrammatically': 'diagrammaticaally','different': 'diffrent', 'driven': 'dirven', 'ecstasy': 'exstacy ecstacy','embarrass': 'embaras embarass', 'establishing': 'astablishing establising','experience': 'experance experiance', 'experiences': 'experances', 'extended':'extented', 'extremely': 'extreamly', 'fails': 'failes', 'families': 'familes','february': 'febuary', 'further': 'futher', 'gallery': 'galery gallary gallerry gallrey','hierarchal': 'hierachial', 'hierarchy': 'hierchy', 'inconvenient':'inconvienient inconvient inconvinient', 'independent': 'independant independant','initial': 'intial', 'initials': 'inetials inistals initails initals intials','juice': 'guic juce jucie juise juse', 'latest': 'lates latets latiest latist','laugh': 'lagh lauf laught lugh', 'level': 'leval','levels': 'levals', 'liaison': 'liaision liason', 'lieu': 'liew', 'literature':'litriture', 'loans': 'lones', 'locally': 'localy', 'magnificent':'magnificnet magificent magnifcent magnifecent magnifiscant magnifisent magnificant','management': 'managment', 'meant': 'ment', 'minuscule': 'miniscule','minutes': 'muinets', 'monitoring': 'monitering', 'necessary':'neccesary necesary neccesary necassary necassery neccasary', 'occurrence':'occurence occurence', 'often': 'ofen offen offten ofton', 'opposite':'opisite oppasite oppesite oppisit oppisite opposit oppossite oppossitte', 'parallel':'paralel paralell parrallel parralell parrallell', 'particular': 'particulaur','perhaps': 'perhapse', 'personnel': 'personnell', 'planned': 'planed', 'poem':'poame', 'poems': 'poims pomes', 'poetry': 'poartry poertry poetre poety powetry','position': 'possition', 'possible': 'possable', 'pretend':'pertend protend prtend pritend', 'problem': 'problam proble promblem proplen','pronunciation': 'pronounciation', 'purple': 'perple perpul poarple','questionnaire': 'questionaire', 'really': 'realy relley relly', 'receipt':'receit receite reciet recipt', 'receive': 'recieve', 'refreshment':'reafreshment refreshmant refresment refressmunt', 'remember': 'rember remeber rememmer rermember','remind': 'remine remined', 'scarcely': 'scarcly scarecly scarely scarsely','scissors': 'scisors sissors', 'separate': 'seperate','singular': 'singulaur', 'someone': 'somone', 'sources': 'sorces', 'southern':'southen', 'special': 'speaical specail specal speical', 'splendid':'spledid splended splened splended', 'standardizing': 'stanerdizing', 'stomach':'stomac stomache stomec stumache', 'supersede': 'supercede superceed', 'there': 'ther','totally': 'totaly', 'transferred': 'transfred', 'transportability':'transportibility', 'triangular': 'triangulaur', 'understand': 'undersand undistand','unexpected': 'unexpcted unexpeted unexspected', 'unfortunately':'unfortunatly', 'unique': 'uneque', 'useful': 'usefull', 'valuable': 'valubale valuble','variable': 'varable', 'variant': 'vairiant', 'various': 'vairious','visited': 'fisited viseted vistid vistied', 'visitors': 'vistors','voluntary': 'volantry', 'voting': 'voteing', 'wanted': 'wantid wonted','whether': 'wether', 'wrote': 'rote wote']).
 
