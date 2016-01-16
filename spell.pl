@@ -8,30 +8,32 @@
 
 init :-
     retractall(freq(_, _)),
-    nwords(WordCounts),
+    nwords('big.txt', WordCounts),
     maplist(assertz, WordCounts).
 
-nwords(WordCounts) :-
-    read_file_to_codes('big.txt', Codes, []),
-    words(CodeLists, Codes, []),
-    maplist(atom_codes, Words, CodeLists),
+% nwords(+File, -WordFrequencies)
+nwords(File, WordCounts) :-
+    read_file_to_codes(File, Codes, []),
+    maplist(char_code, Chars, Codes),
+    words(Words, Chars, []),
     maplist(downcase_atom, Words, LCWords),
     count_occurrences(LCWords, WordCounts).
 
-words(WCodes) --> blank, !, words(WCodes).
-words([WCodes | WsCodes]) --> word(WCodes), !, words(WsCodes).
+% Returns a list of words from a list of characters
+words(Words) --> blank, !, words(Words).
+words([Word | Words]) --> word(Word), !, words(Words).
 words([]) --> [].
 
-word([Code | Codes]) --> letters([Code | Codes]).
+word(Word) --> letters([Char | Chars]), {atom_chars(Word, [Char | Chars])}.
 
 letters([L | Ls]) --> letter(L), !, letters(Ls).
 letters([]) --> [].
 
-letter(Code) --> [Code], {code_type(Code, alpha)}.
+letter(Char) --> [Char], {char_type(Char, alpha)}.
 
-blank --> [Code], {\+ code_type(Code, alpha)}.
+blank --> [Char], {\+ char_type(Char, alpha)}.
 
-correct(Word, Correct) :- 
+correct(Word, Correct) :-
     correct_(Word, Knowns),
     maplist(val_key, Knowns, ValKeys),
     max_member(_:Correct, ValKeys), !.
@@ -48,14 +50,14 @@ edits1(WAtom, SortedEditAtoms) :-
     findall(EditAtom, (atom_chars(WAtom, W),
             append(Start, End, W),
             append(Start, End1, Edit),
-            edit(End, End1),
+            edit_op(End, End1),
             atom_chars(EditAtom, Edit)), EditAtoms),
     sort(EditAtoms,SortedEditAtoms).
 
-edit([_ | End], End). % delete
-edit([X, Y | End],[Y, X | End]). % transpose
-edit([_ | End], [L | End]):- letter(L). % replace
-edit(End, [L | End]):- letter(L). % insert
+edit_op([_|End], End). % delete
+edit_op([X, Y|End], [Y, X|End]). % transpose
+edit_op([_|End], [L|End]) :- letter(L). % replace
+edit_op(End, [L|End]) :- letter(L). % insert
 
 letter(Char) :- member(Char, [a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
 

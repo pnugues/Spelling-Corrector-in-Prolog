@@ -4,8 +4,7 @@
 :- use_module(library(lineutils)).
 :- use_module(library(charsio)).
 
-:- [max_member].
-
 :- [spell].
 %:- [spell_improved].
-:- [-count_errors].
+:- ['yap_compatibility/max_member'].
+:- [-'yap_compatibility/count_errors'].
